@@ -250,24 +250,24 @@ const App: React.FC = () => {
       ...(remote.deletedItemIds || []),
     ]);
 
-    const mergeById = (a: any[], b: any[]) => {
+    const mergeById = (a: any[], b: any[], checkDeleted: boolean = true) => {
       const map = new Map();
       (a || []).forEach((item) => {
-        if (item && item.id && !allDeletedIds.has(item.id)) {
+        if (item && item.id && (!checkDeleted || !allDeletedIds.has(item.id))) {
           map.set(item.id, { ...item });
         }
       });
       (b || []).forEach((item) => {
-        if (item && item.id && !allDeletedIds.has(item.id)) {
+        if (item && item.id && (!checkDeleted || !allDeletedIds.has(item.id))) {
           const existing = map.get(item.id);
           if (!existing) {
             map.set(item.id, { ...item });
           } else {
-            const itemTime = item.updatedAt
-              ? new Date(item.updatedAt).getTime()
+            const itemTime = (item.archivedAt || item.updatedAt)
+              ? new Date(item.archivedAt || item.updatedAt).getTime()
               : 0;
-            const existingTime = existing.updatedAt
-              ? new Date(existing.updatedAt).getTime()
+            const existingTime = (existing.archivedAt || existing.updatedAt)
+              ? new Date(existing.archivedAt || existing.updatedAt).getTime()
               : 0;
             if (itemTime > existingTime) {
               map.set(item.id, { ...existing, ...item });
@@ -285,10 +285,12 @@ const App: React.FC = () => {
       archivedTasks: mergeById(
         local.archivedTasks || [],
         remote.archivedTasks || [],
+        false
       ),
       archivedItems: mergeById(
         local.archivedItems || [],
         remote.archivedItems || [],
+        false
       ),
       projects: mergeById(local.projects, remote.projects),
       ideas: mergeById(local.ideas, remote.ideas),
