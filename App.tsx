@@ -430,7 +430,29 @@ const App: React.FC = () => {
   };
 
   const parseAndValidateData = (content: string) => {
-    const parsed = JSON.parse(content);
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch (e) {
+      setSafeModeError("Data validation failed: Invalid JSON format.");
+      throw new Error("Validation Error: Invalid JSON format.");
+    }
+    
+    // Auto-migrate legacy dailyFollowUp string to array format
+    if (typeof parsed.dailyFollowUp === "string") {
+      if (parsed.dailyFollowUp.trim()) {
+        parsed.dailyFollowUp = [
+          {
+            id: Math.random().toString(36).substr(2, 9),
+            date: new Date().toISOString().split("T")[0],
+            text: parsed.dailyFollowUp,
+          },
+        ];
+      } else {
+        parsed.dailyFollowUp = [];
+      }
+    }
+    
     const result = stateSchema.safeParse(parsed);
     if (!result.success) {
       setSafeModeError(
