@@ -182,11 +182,14 @@ const Dashboard: React.FC<{ state: AppState }> = ({ state }) => {
         }
       });
 
+      const isCurrent = now >= start && now < end;
+
       return {
         name: label,
         projected: Math.round(projected),
         actual: Math.round(actual),
         capacity: Math.round(intervalCapacity),
+        isCurrent,
       };
     });
   }, [
@@ -381,6 +384,13 @@ const Dashboard: React.FC<{ state: AppState }> = ({ state }) => {
     return { onTrack, atRisk, offTrack, totalActual, totalTarget };
   }, [state.kpis]);
 
+  const currentLoadDisplay = useMemo(() => {
+    const current = workloadData.find(d => d.isCurrent);
+    if (!current) return "0%";
+    const loadPercent = current.capacity > 0 ? Math.round((current.projected / current.capacity) * 100) : 0;
+    return `${loadPercent}%`;
+  }, [workloadData]);
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -399,7 +409,7 @@ const Dashboard: React.FC<{ state: AppState }> = ({ state }) => {
           },
           {
             label: "Current Load",
-            value: utilizationFilter.toUpperCase(),
+            value: currentLoadDisplay,
             icon: <Clock size={20} />,
             color: "bg-green-600",
           },
