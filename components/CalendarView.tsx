@@ -332,6 +332,22 @@ const CalendarView: React.FC<CalendarViewProps> = ({
               <h3 className="text-2xl font-black text-black leading-none">
                 {format(selectedDate, "EEEE, MMM do")}
               </h3>
+              {(() => {
+                const day = format(selectedDate, 'EEEE');
+                const details: Record<string, string> = {
+                  Monday: "Machine Orders (MO) & BOM",
+                  Tuesday: "SOP and Fixtures",
+                  Wednesday: "Project Updates",
+                  Thursday: "CN and EITC Support",
+                  Friday: "Weekly Improvement"
+                };
+                return details[day] ? (
+                  <p className="text-sm font-bold text-[#FDB913] mt-2 flex items-center bg-zinc-50 py-1.5 px-3 rounded-md border border-zinc-100">
+                    <span className="w-2 h-2 rounded-full bg-[#FDB913] mr-2"></span>
+                    {details[day]}
+                  </p>
+                ) : null;
+              })()}
             </div>
 
             <div className="flex bg-zinc-100 p-1 rounded-full">

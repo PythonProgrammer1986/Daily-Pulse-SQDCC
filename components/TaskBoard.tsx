@@ -59,6 +59,7 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterOwner, setFilterOwner] = useState("All");
+  const [filterQuick, setFilterQuick] = useState<"All" | "Weekly Improvement" | "Initiatives">("All");
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState<"details" | "history">(
@@ -77,7 +78,15 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
         t.task.toLowerCase().includes(searchTerm.toLowerCase()) ||
         t.owner.toLowerCase().includes(searchTerm.toLowerCase());
       const matchOwner = filterOwner === "All" || t.owner === filterOwner;
-      return matchSearch && matchOwner;
+      
+      let matchQuick = true;
+      if (filterQuick === "Weekly Improvement") {
+        matchQuick = t.category === "Continuous Improvement" || t.category === "Weekly Improvement";
+      } else if (filterQuick === "Initiatives") {
+        matchQuick = !!t.project || t.category === "Initiative";
+      }
+
+      return matchSearch && matchOwner && matchQuick;
     });
 
     // Custom Sort by Taxonomy Category Hierarchy
@@ -92,7 +101,7 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
       // Secondary sort alphabetically if categories are identical
       return a.task.localeCompare(b.task);
     });
-  }, [tasks, searchTerm, filterOwner]);
+  }, [tasks, searchTerm, filterOwner, filterQuick]);
 
   const closeModal = () => {
     if (editingTask?.id) {
@@ -243,6 +252,28 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
               </option>
             ))}
           </select>
+        </div>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setFilterQuick(filterQuick === "Weekly Improvement" ? "All" : "Weekly Improvement")}
+            className={`px-4 py-2 rounded text-xs font-black uppercase tracking-widest transition border ${
+              filterQuick === "Weekly Improvement" 
+                ? "bg-black text-[#FDB913] border-black shadow-md"
+                : "bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50"
+            }`}
+          >
+            Weekly Improvement
+          </button>
+          <button
+            onClick={() => setFilterQuick(filterQuick === "Initiatives" ? "All" : "Initiatives")}
+            className={`px-4 py-2 rounded text-xs font-black uppercase tracking-widest transition border ${
+              filterQuick === "Initiatives" 
+                ? "bg-black text-[#FDB913] border-black shadow-md"
+                : "bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50"
+            }`}
+          >
+            Initiatives
+          </button>
         </div>
         {!readOnly && (
           <button

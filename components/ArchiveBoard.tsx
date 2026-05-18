@@ -42,17 +42,26 @@ const ArchiveBoard: React.FC<ArchiveBoardProps> = ({ data }) => {
         });
       });
 
-    // Add active ideas that are Implemented or Rejected
-    (data.ideas || [])
-      .filter((i) => i.status === "Implemented" || i.status === "Rejected")
-      .forEach((i) => {
+    // Add active ideas that are Implemented or Rejected, or whose task was completed
+    (data.ideas || []).forEach((i) => {
+      const linkedTask = (data.tasks || []).find((t) => t.ideaLink === i.id);
+      const isCompleted =
+        i.status === "Implemented" ||
+        i.status === "Rejected" ||
+        (linkedTask && linkedTask.status === "Completed");
+
+      if (isCompleted) {
         items.push({
           id: i.id,
           type: "Idea",
           item: i,
-          archivedAt: i.updatedAt || new Date().toISOString(),
+          archivedAt:
+            linkedTask && linkedTask.status === "Completed"
+              ? linkedTask.updatedAt || new Date().toISOString()
+              : i.updatedAt || new Date().toISOString(),
         });
-      });
+      }
+    });
 
     // Add active projects that are 100%
     (data.projects || [])
