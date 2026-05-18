@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { KPI, KPIDailyLog } from "../types";
-import { Plus, Edit2, Trash2, Target, History, Archive } from "lucide-react";
+import { Plus, Edit2, Trash2, Target, History, Archive, ChevronLeft, ChevronRight } from "lucide-react";
 import { format, getDaysInMonth } from "date-fns";
 
 interface KPITrackerProps {
@@ -16,13 +16,26 @@ const KPITracker: React.FC<KPITrackerProps> = ({ kpis, updateKpis, archiveKpi })
   // store which KPI and date we are adding a log for
   const [showLogModal, setShowLogModal] = useState<{kpi: KPI; date: Date} | null>(null);
 
+  // Default to the current month/year
+  const [currentDate, setCurrentDate] = useState(() => {
+     const now = new Date();
+     return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+
   const monthDays = useMemo(() => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
-    const daysInMonthCount = getDaysInMonth(today);
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const daysInMonthCount = getDaysInMonth(currentDate);
     return Array.from({ length: daysInMonthCount }, (_, i) => new Date(year, month, i + 1));
-  }, []);
+  }, [currentDate]);
+
+  const handlePrevMonth = () => {
+     setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+     setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
 
   const handleSaveKpi = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -121,16 +134,35 @@ const KPITracker: React.FC<KPITrackerProps> = ({ kpis, updateKpis, archiveKpi })
         <h2 className="text-2xl font-bold text-gray-800">
           KPI Performance Tracker
         </h2>
-        <button
-          onClick={() => {
-            setEditingKpi(null);
-            setShowModal(true);
-          }}
-          className="bg-black text-[#FDB913] px-6 py-2 rounded-md font-bold flex items-center space-x-2 hover:bg-[#222] transition"
-        >
-          <Plus size={20} />
-          <span>ADD KPI</span>
-        </button>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 bg-white rounded shadow-sm border border-gray-100 p-1">
+            <button
+              onClick={handlePrevMonth}
+              className="p-1.5 hover:bg-gray-100 rounded text-gray-600 transition"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <span className="text-sm font-bold text-gray-800 min-w-[120px] text-center">
+              {format(currentDate, "MMMM yyyy")}
+            </span>
+            <button
+              onClick={handleNextMonth}
+              className="p-1.5 hover:bg-gray-100 rounded text-gray-600 transition"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+          <button
+            onClick={() => {
+              setEditingKpi(null);
+              setShowModal(true);
+            }}
+            className="bg-black text-[#FDB913] px-6 py-2 rounded-md font-bold flex items-center space-x-2 hover:bg-[#222] transition"
+          >
+            <Plus size={20} />
+            <span>ADD KPI</span>
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded border border-gray-100 shadow-sm overflow-x-auto">
@@ -160,7 +192,7 @@ const KPITracker: React.FC<KPITrackerProps> = ({ kpis, updateKpis, archiveKpi })
                 const parts = l.date.split("-");
                 if (parts.length !== 3) return false;
                 const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-                return d.getMonth() === new Date().getMonth() && d.getFullYear() === new Date().getFullYear();
+                return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
               });
               const sumTarget = thisMonthLogs.reduce((acc, l) => acc + (l.targetNumber || 0), 0);
               const sumActual = thisMonthLogs.reduce((acc, l) => acc + (l.actualNumber || 0), 0);

@@ -351,6 +351,36 @@ const Dashboard: React.FC<{ state: AppState }> = ({ state }) => {
       }));
   }, [timelineZoom, timelineRange]);
 
+  const kpiStats = useMemo(() => {
+    let onTrack = 0;
+    let atRisk = 0;
+    let offTrack = 0;
+    
+    let totalActual = 0;
+    let totalTarget = 0;
+
+    (state.kpis || []).forEach(kpi => {
+      totalActual += (kpi.actualNumber || 0);
+      totalTarget += (kpi.targetNumber || 0);
+
+      const thisMonthLogs = (kpi.dailyLogs || []).filter(l => {
+        const parts = l.date.split("-");
+        if (parts.length !== 3) return false;
+        const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        return d.getMonth() === new Date().getMonth() && d.getFullYear() === new Date().getFullYear();
+      });
+      const sumTarget = thisMonthLogs.reduce((acc, l) => acc + (l.targetNumber || 0), 0);
+      const sumActual = thisMonthLogs.reduce((acc, l) => acc + (l.actualNumber || 0), 0);
+      const avgMonthProgress = sumTarget > 0 ? Math.round((sumActual / sumTarget) * 100) : 0;
+
+      if (avgMonthProgress >= 75) onTrack++;
+      else if (avgMonthProgress >= 50) atRisk++;
+      else offTrack++;
+    });
+
+    return { onTrack, atRisk, offTrack, totalActual, totalTarget };
+  }, [state.kpis]);
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -816,13 +846,27 @@ const Dashboard: React.FC<{ state: AppState }> = ({ state }) => {
                 KPI Performance Summary
               </h3>
             </div>
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center justify-end space-x-6">
+              <div className="flex space-x-3 items-center mt-2 md:mt-0">
+                <div title="On Track" className="flex items-center space-x-1.5 bg-green-50 px-2 py-1 object-conain border border-green-100 rounded-md">
+                   <div className="w-2 h-2 rounded-full bg-green-500 shadow-sm" />
+                   <span className="text-xs font-black text-green-700">{kpiStats.onTrack}</span>
+                </div>
+                <div title="At Risk" className="flex items-center space-x-1.5 bg-yellow-50 px-2 py-1 border border-yellow-100 rounded-md">
+                   <div className="w-2 h-2 rounded-full bg-[#FDB913] shadow-sm" />
+                   <span className="text-xs font-black text-yellow-700">{kpiStats.atRisk}</span>
+                </div>
+                <div title="Off Track" className="flex items-center space-x-1.5 bg-red-50 px-2 py-1 border border-red-100 rounded-md">
+                   <div className="w-2 h-2 rounded-full bg-red-500 shadow-sm" />
+                   <span className="text-xs font-black text-red-700">{kpiStats.offTrack}</span>
+                </div>
+              </div>
               <div className="flex flex-col items-end">
                 <span className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-1">
                   Overall Progress
                 </span>
                 <span className="text-sm font-bold text-gray-900 border border-gray-200 px-3 py-1 rounded bg-gray-50">
-                  {state.kpis.reduce((acc, kpi) => acc + (kpi.actualNumber || 0), 0)} / {state.kpis.reduce((acc, kpi) => acc + (kpi.targetNumber || 0), 0)}
+                  {kpiStats.totalActual} / {kpiStats.totalTarget}
                 </span>
               </div>
             </div>
