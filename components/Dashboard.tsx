@@ -749,6 +749,181 @@ const Dashboard: React.FC<{ state: AppState }> = ({ state }) => {
           })}
         </div>
       </div>
+
+      {state.tasks && state.tasks.filter((t) => t.escalated || (t.status !== "Completed" && new Date() > new Date(t.dueDate))).length > 0 && (
+        <div className="bg-red-50 p-6 rounded-xl shadow-sm border border-red-100">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-2">
+              <AlertTriangle className="text-red-500" size={20} />
+              <h3 className="text-lg font-black uppercase tracking-tight text-red-900">
+                Action Required: Escalated & Deviated Operations
+              </h3>
+            </div>
+            <span className="text-[10px] font-black uppercase text-red-400 tracking-[0.2em] bg-red-100 px-3 py-1 rounded-full">
+              Attention Needed
+            </span>
+          </div>
+          <div className="space-y-3">
+            {state.tasks
+              .filter((t) => t.escalated || (t.status !== "Completed" && new Date() > new Date(t.dueDate)))
+              .map((t) => {
+                const isEscalated = t.escalated;
+                const isOverdue = t.status !== "Completed" && new Date() > new Date(t.dueDate);
+                return (
+                  <div key={t.id} className="bg-white p-4 rounded-lg border border-red-200 shadow-sm flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm font-black text-gray-900 mb-1">{t.task}</span>
+                        {isEscalated && (
+                          <span className="text-[9px] font-black uppercase text-white bg-red-500 px-2 py-0.5 rounded tracking-widest">
+                            Escalated
+                          </span>
+                        )}
+                        {isOverdue && (
+                          <span className="text-[9px] font-black uppercase text-black bg-[#FDB913] px-2 py-0.5 rounded tracking-widest">
+                            Schedule Deviated
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Owner: <span className="font-bold">{t.owner}</span> • Due: <span className={`font-bold ${isOverdue ? "text-red-500" : ""}`}>{t.dueDate}</span>
+                      </div>
+                      {isEscalated && t.escalationReason && (
+                        <div className="text-xs text-red-700 italic mt-2 bg-red-50 p-2 rounded">
+                          "{t.escalationReason}"
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right flex flex-col items-end">
+                      <div className="text-xs font-black text-gray-900 mb-1">{t.progress}% Complete</div>
+                      <div className="w-24 bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                        <div className="h-full bg-red-500" style={{ width: `${t.progress}%` }}></div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
+      
+      {state.kpis && state.kpis.length > 0 && (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-2">
+              <Target className="text-[#FDB913]" size={20} />
+              <h3 className="text-lg font-black uppercase tracking-tight">
+                KPI Performance Summary
+              </h3>
+            </div>
+            <div className="flex items-center space-x-6">
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] mb-1">
+                  Overall Progress
+                </span>
+                <span className="text-sm font-bold text-gray-900 border border-gray-200 px-3 py-1 rounded bg-gray-50">
+                  {state.kpis.reduce((acc, kpi) => acc + (kpi.actualNumber || 0), 0)} / {state.kpis.reduce((acc, kpi) => acc + (kpi.targetNumber || 0), 0)}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left whitespace-nowrap min-w-max">
+              <thead className="bg-zinc-50 border-b border-gray-100">
+                <tr>
+                  <th className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                    KPI Indicator
+                  </th>
+                  <th className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                    Monthly Target
+                  </th>
+                  <th className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                    Latest Update
+                  </th>
+                  <th className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                    Current Progress (Summary)
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {state.kpis.map((kpi) => {
+                  const thisMonthLogs = (kpi.dailyLogs || []).filter(l => {
+                    const parts = l.date.split("-");
+                    if (parts.length !== 3) return false;
+                    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+                    return d.getMonth() === new Date().getMonth() && d.getFullYear() === new Date().getFullYear();
+                  });
+                  const sumTarget = thisMonthLogs.reduce((acc, l) => acc + (l.targetNumber || 0), 0);
+                  const sumActual = thisMonthLogs.reduce((acc, l) => acc + (l.actualNumber || 0), 0);
+                  const avgMonthProgress = sumTarget > 0
+                      ? Math.round((sumActual / sumTarget) * 100)
+                      : 0;
+
+                  const lastLog =
+                    kpi.dailyLogs && kpi.dailyLogs.length > 0
+                      ? kpi.dailyLogs[kpi.dailyLogs.length - 1]
+                      : null;
+                  return (
+                    <tr key={kpi.id} className="hover:bg-zinc-50 transition">
+                      <td className="px-5 py-4">
+                        <span className="text-sm font-black text-gray-800">
+                          {kpi.name}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="text-xs font-bold text-gray-500">
+                          {kpi.target}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        {lastLog ? (
+                          <div>
+                            <div className="text-xs font-bold text-gray-900 mb-0.5">
+                              {format(new Date(lastLog.date), "MMM d")}
+                            </div>
+                            <div className="text-[10px] text-gray-500 italic max-w-[200px] truncate">
+                              "{lastLog.remarks}"
+                            </div>
+                          </div>
+                        ) : kpi.remarks ? (
+                          <div className="text-[10px] text-gray-500 italic max-w-[200px] truncate">
+                            "{kpi.remarks}"
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400">---</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="w-48">
+                          <div className="flex justify-between items-end text-[10px] font-bold mb-1">
+                            <span className="text-gray-400">
+                              {sumActual} / {sumTarget}
+                            </span>
+                            <span className="text-gray-900">{avgMonthProgress}% <span className="text-gray-400 font-normal ml-1">avg</span></span>
+                          </div>
+                          <div className="w-full bg-zinc-200 h-1.5 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full ${
+                                avgMonthProgress >= 75
+                                  ? "bg-green-500"
+                                  : avgMonthProgress >= 50
+                                    ? "bg-[#FDB913]"
+                                    : "bg-red-500"
+                              }`}
+                              style={{ width: `${avgMonthProgress}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

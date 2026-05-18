@@ -55,6 +55,7 @@ import CalendarView from "./components/CalendarView";
 import IdeaMatrix from "./components/IdeaMatrix";
 import KudosBoard from "./components/KudosBoard";
 import OKRBoard from "./components/OKRBoard";
+import KPITracker from "./components/KPITracker";
 import Masters from "./components/Masters";
 import HoursBooking from "./components/HoursBooking";
 import ArchiveBoard from "./components/ArchiveBoard";
@@ -71,6 +72,7 @@ export const stateSchema = z
     archivedItems: z.array(z.any()).optional(),
     projects: z.array(z.any()).optional(),
     ideas: z.array(z.any()).optional(),
+    kpis: z.array(z.any()).optional(),
     kudos: z.array(z.any()).optional(),
     okrs: z.array(z.any()).optional(),
     users: z.array(z.any()).optional(),
@@ -98,6 +100,7 @@ const tabs = [
   { id: "tasks", name: "Task Board", icon: <ListChecks size={18} /> },
   { id: "ideas", name: "Improvement Pulse", icon: <Lightbulb size={18} /> },
   { id: "okrs", name: "Strategic Pulse", icon: <Target size={18} /> },
+  { id: "kpis", name: "KPI Tracking", icon: <BarChart3 size={18} /> },
   { id: "projects", name: "Initiatives", icon: <BarChart3 size={18} /> },
   { id: "bookings", name: "Time Logs", icon: <Clock size={18} /> },
   { id: "kudos", name: "Recognition", icon: <Award size={18} /> },
@@ -146,6 +149,7 @@ const App: React.FC = () => {
         archivedTasks: parsed.archivedTasks || [],
         archivedItems: parsed.archivedItems || [],
         activeLocks: parsed.activeLocks || {},
+        kpis: parsed.kpis || [],
         dailyFollowUp: parsed.dailyFollowUp || [],
         ssqdcc_safety: parsed.ssqdcc_safety || [],
         ssqdcc_sustainability: parsed.ssqdcc_sustainability || [],
@@ -163,6 +167,7 @@ const App: React.FC = () => {
       archivedItems: [],
       projects: [],
       ideas: [],
+      kpis: [],
       kudos: [],
       okrs: [],
       users: DEFAULT_USERS.map((name) => ({ name, capacity: 160 })),
@@ -294,6 +299,7 @@ const App: React.FC = () => {
       ),
       projects: mergeById(local.projects, remote.projects),
       ideas: mergeById(local.ideas, remote.ideas),
+      kpis: mergeById(local.kpis, remote.kpis),
       kudos: mergeById(local.kudos, remote.kudos),
       okrs: mergeById(local.okrs, remote.okrs),
       bookings: mergeById(local.bookings, remote.bookings),
@@ -874,6 +880,17 @@ const App: React.FC = () => {
             okrs={data.okrs}
             tasks={data.tasks}
             updateOkrs={(okrs) => updateData({ okrs })}
+          />
+        )}
+        {activeTab === "kpis" && (
+          <KPITracker
+            kpis={data.kpis || []}
+            updateKpis={(kpis) => updateData({ kpis })}
+            archiveKpi={(kpi) => {
+              const archivedItems = [...(data.archivedItems || []), { id: kpi.id, type: "KPI" as any, item: kpi, archivedAt: new Date().toISOString() }];
+              const kpis = (data.kpis || []).filter(k => k.id !== kpi.id);
+              updateData({ kpis, archivedItems });
+            }}
           />
         )}
         {activeTab === "ideas" && (

@@ -16,6 +16,7 @@ import {
   Lightbulb,
   BarChart3,
   Calendar,
+  Target,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -112,6 +113,8 @@ const ArchiveBoard: React.FC<ArchiveBoardProps> = ({ data }) => {
         return <BarChart3 size={16} className="text-blue-500" />;
       case "Calendar":
         return <Calendar size={16} className="text-purple-500" />;
+      case "KPI":
+        return <Target size={16} className="text-[#FDB913]" />;
       default:
         return <CheckCircle2 size={16} className="text-gray-500" />;
     }
@@ -122,6 +125,7 @@ const ArchiveBoard: React.FC<ArchiveBoardProps> = ({ data }) => {
     if (item.type === "Idea") return item.item.title;
     if (item.type === "Project") return item.item.name;
     if (item.type === "Calendar") return item.item.text;
+    if (item.type === "KPI") return item.item.name;
     return "Unknown Item";
   };
 
@@ -129,6 +133,7 @@ const ArchiveBoard: React.FC<ArchiveBoardProps> = ({ data }) => {
     if (item.type === "Task") return item.item.category;
     if (item.type === "Idea") return item.item.category;
     if (item.type === "Calendar") return item.category;
+    if (item.type === "KPI") return `${item.item.completion}% Completion`;
     return "-";
   };
 

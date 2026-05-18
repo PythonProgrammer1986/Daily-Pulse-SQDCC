@@ -121,6 +121,8 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
       keyResultLink: formData.get("keyResultLink") as string,
       ideaLink: formData.get("ideaLink") as string,
       notes: formData.get("notes") as string,
+      escalated: formData.get("escalated") === "true",
+      escalationReason: formData.get("escalationReason") as string,
       updatedAt: new Date().toISOString(),
     };
 
@@ -296,10 +298,13 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
                   currentLock.userId &&
                   currentLock.userId !== deviceId;
 
+                const isDeviated = t.status !== "Completed" && new Date() > new Date(t.dueDate);
+                const isEscalated = t.escalated;
+
                 return (
                   <tr
                     key={t.id}
-                    className={`transition group ${isLockedOther ? "bg-zinc-50 opacity-60 cursor-not-allowed" : "hover:bg-zinc-50 cursor-pointer"}`}
+                    className={`transition group ${isLockedOther ? "bg-zinc-50 opacity-60 cursor-not-allowed" : "hover:bg-zinc-50 cursor-pointer"} ${isEscalated ? "border-l-4 border-l-red-500 bg-red-50" : isDeviated ? "border-l-4 border-l-[#FDB913] bg-yellow-50/50" : ""}`}
                     onClick={() => {
                       if (!isLockedOther) {
                         openEdit(t);
@@ -313,6 +318,13 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
                             className="text-red-500 shrink-0"
                             size={14}
                             title={`Locked by another user`}
+                          />
+                        )}
+                        {(isEscalated || isDeviated) && (
+                          <AlertTriangle 
+                            size={16} 
+                            className={`shrink-0 ${isEscalated ? "text-red-500" : "text-[#FDB913]"}`} 
+                            title={isEscalated ? `Escalated: ${t.escalationReason || "No reason given"}` : "Schedule Deviated (Overdue)"}
                           />
                         )}
                         <p className="font-black text-zinc-900 text-sm leading-tight mb-1">
@@ -633,6 +645,40 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
                             </option>
                           ))}
                         </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-6 border-t border-gray-100">
+                    <h3 className="text-xs font-black uppercase tracking-widest text-[#FDB913] mb-4 flex items-center space-x-2">
+                      <AlertTriangle size={14} />
+                      <span>Issue Escalation</span>
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="flex items-center space-x-2">
+                        <input 
+                          type="checkbox" 
+                          name="escalated" 
+                          id="escalated"
+                          value="true"
+                          defaultChecked={editingTask?.escalated}
+                          className="w-4 h-4"
+                          disabled={readOnly}
+                        />
+                        <label htmlFor="escalated" className="text-sm font-bold text-gray-700">Flag as Escalated Operation</label>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">
+                          Reason for Escalation
+                        </label>
+                        <input
+                          type="text"
+                          name="escalationReason"
+                          defaultValue={editingTask?.escalationReason || ""}
+                          placeholder="Why is this operation escalated?"
+                          className="w-full border p-3 rounded font-bold outline-none text-xs"
+                          disabled={readOnly}
+                        />
                       </div>
                     </div>
                   </div>

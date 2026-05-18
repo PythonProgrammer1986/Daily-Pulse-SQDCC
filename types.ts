@@ -53,6 +53,8 @@ export interface Task {
   history: HistoryEntry[];
   comments: Comment[];
   updatedAt?: string;
+  escalated?: boolean;
+  escalationReason?: string;
 }
 
 export interface Project {
@@ -79,12 +81,24 @@ export interface Activity {
   updatedAt?: string;
 }
 
+export interface KPIDailyLog {
+  id: string;
+  date: string;
+  targetNumber?: number;
+  actualNumber?: number;
+  progress: number;
+  remarks: string;
+}
+
 export interface KPI {
   id: string;
   name: string;
   target: string;
+  targetNumber?: number;
+  actualNumber?: number;
   completion: number;
   remarks: string;
+  dailyLogs?: KPIDailyLog[];
   updatedAt?: string;
 }
 
@@ -153,7 +167,7 @@ export interface ActiveLock {
 
 export interface ArchivedItem {
   id: string;
-  type: "Task" | "Project" | "Idea" | "Calendar";
+  type: "Task" | "Project" | "Idea" | "Calendar" | "KPI";
   category?: string;
   item: any;
   archivedAt: string;
@@ -166,6 +180,7 @@ export interface AppState {
   archivedItems?: ArchivedItem[];
   projects: Project[];
   ideas: Idea[];
+  kpis?: KPI[];
   kudos: Kudos[];
   okrs: OKR[];
   users: User[];
