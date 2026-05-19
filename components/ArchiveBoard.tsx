@@ -30,9 +30,9 @@ const ArchiveBoard: React.FC<ArchiveBoardProps> = ({ data }) => {
   const allItems = useMemo(() => {
     const items: ArchivedItem[] = [...(data.archivedItems || [])];
 
-    // Add active tasks that are completed or manually archived
+    // Add active tasks that are completed
     (data.tasks || [])
-      .filter((t) => t.isArchived || t.status === "Completed")
+      .filter((t) => t.status === "Completed")
       .forEach((t) => {
         items.push({
           id: t.id,
@@ -46,11 +46,9 @@ const ArchiveBoard: React.FC<ArchiveBoardProps> = ({ data }) => {
     (data.ideas || []).forEach((i) => {
       const linkedTask = (data.tasks || []).find((t) => t.ideaLink === i.id);
       const isCompleted =
-        i.isArchived ||
         i.status === "Implemented" ||
         i.status === "Rejected" ||
-        (linkedTask && linkedTask.status === "Completed") ||
-        (linkedTask && linkedTask.isArchived);
+        (linkedTask && linkedTask.status === "Completed");
 
       if (isCompleted) {
         items.push({
@@ -65,9 +63,9 @@ const ArchiveBoard: React.FC<ArchiveBoardProps> = ({ data }) => {
       }
     });
 
-    // Add active projects that are 100% or manually archived
+    // Add active projects that are 100%
     (data.projects || [])
-      .filter((p) => p.isArchived || p.status === "Completed" || p.progress === 100)
+      .filter((p) => p.progress === 100)
       .forEach((p) => {
         items.push({
           id: p.id,
@@ -83,7 +81,7 @@ const ArchiveBoard: React.FC<ArchiveBoardProps> = ({ data }) => {
       cat: string,
     ) => {
       (list || [])
-        .filter((i) => i.isArchived || i.completed)
+        .filter((i) => i.completed)
         .forEach((i) => {
           items.push({
             id: i.id,

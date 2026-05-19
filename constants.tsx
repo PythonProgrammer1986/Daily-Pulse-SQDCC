@@ -31,6 +31,7 @@ export const DEFAULT_CATEGORIES = [
   "Information & Team Suggestions",
   "Problem Solving",
   "Continuous Improvement",
+  "Strategic Initiatives & Action Plans",
 ];
 
 export const SSQDCC_CATEGORIES = [

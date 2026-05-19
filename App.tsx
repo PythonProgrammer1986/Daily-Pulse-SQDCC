@@ -681,25 +681,26 @@ const App: React.FC = () => {
       )}
 
       <header
-        className="h-20 flex items-center px-8 bg-zinc-900 border-b-4 border-[#FDB913] text-white relative z-20"
+        className="h-32 flex items-center px-8 relative overflow-hidden transition-colors duration-500 text-[#3d4d5b]"
+        style={{ backgroundColor: BRAND.YELLOW }}
       >
         <div className="flex flex-col z-10">
           <div className="flex items-center">
             <Logo />
           </div>
-          <div className="flex items-center space-x-6 ml-[4.5rem] -mt-1 text-[9px] uppercase tracking-[0.2em] font-medium text-zinc-400">
+          <div className="flex items-center space-x-6 ml-1 mt-2 text-[9px] uppercase tracking-[0.25em] font-black opacity-80">
             <span className="flex items-center">
               {fileHandle ? (
-                <Wifi size={10} className="mr-1.5 text-[#FDB913]" />
+                <Wifi size={11} className="mr-2" />
               ) : (
-                <WifiOff size={10} className="mr-1.5" />
+                <WifiOff size={11} className="mr-2" />
               )}
               {fileHandle ? "CONNECTED" : "STANDALONE"}
             </span>
             <span className="flex items-center">
               <ShieldCheck
-                size={10}
-                className={`mr-1.5 ${backupDirHandle ? "text-green-500" : ""}`}
+                size={11}
+                className={`mr-2 ${backupDirHandle ? "text-green-700" : ""}`}
               />
               BACKUP: {backupDirHandle ? "ACTIVE" : "OFF"}
             </span>
@@ -708,7 +709,7 @@ const App: React.FC = () => {
 
         <div className="flex-1"></div>
 
-        <div className="flex items-center space-x-3 z-10">
+        <div className="flex items-center space-x-4 z-10">
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
             title="Toggle Dark Mode"
@@ -808,21 +809,19 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-40 overflow-x-auto shadow-sm">
-        <div className="max-w-[1600px] mx-auto flex min-w-max px-4">
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm overflow-x-auto">
+        <div className="max-w-7xl mx-auto flex min-w-max">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-2 px-5 py-4 transition-all border-b-2 text-[11px] font-bold uppercase tracking-wider ${
+              className={`flex items-center space-x-3 px-8 py-5 transition-all border-b-4 ${
                 activeTab === tab.id
-                  ? "border-black text-black bg-zinc-50/50"
-                  : "border-transparent text-gray-500 hover:text-black hover:border-gray-300"
+                  ? "border-[#FDB913] text-black font-black bg-gray-50"
+                  : "border-transparent text-gray-400 hover:text-black hover:bg-gray-50"
               }`}
             >
-              <div className={activeTab === tab.id ? "text-[#FDB913]" : "text-gray-400"}>
-                {tab.icon}
-              </div>
+              {tab.icon}
               <span className="text-[11px] uppercase tracking-[0.15em] font-black">
                 {tab.name}
               </span>
