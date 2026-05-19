@@ -73,7 +73,7 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
   const [selectedOkrId, setSelectedOkrId] = useState<string>("");
 
   const filteredTasks = useMemo(() => {
-    const result = tasks.filter((t) => {
+    const result = tasks.filter((t) => !t.isArchived).filter((t) => {
       const matchSearch =
         t.task.toLowerCase().includes(searchTerm.toLowerCase()) ||
         t.owner.toLowerCase().includes(searchTerm.toLowerCase());
@@ -182,6 +182,21 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
       )
     ) {
       updateTasks(tasks.filter((t) => t.id !== taskId));
+      if (editingTask?.id === taskId) {
+        setLock(taskId, null);
+      }
+      closeModal();
+    }
+  };
+
+  const handleArchiveTask = (taskId: string) => {
+    if (readOnly) return;
+    if (confirm("Move this operation to the Audit Trail (Archive)?")) {
+      updateTasks(
+        tasks.map((t) =>
+          t.id === taskId ? { ...t, isArchived: true, updatedAt: new Date().toISOString() } : t
+        )
+      );
       if (editingTask?.id === taskId) {
         setLock(taskId, null);
       }
@@ -736,14 +751,24 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
             {!readOnly && (
               <div className="p-8 border-t bg-zinc-50 flex justify-between items-center shrink-0">
                 {editingTask && (
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteTask(editingTask.id)}
-                    className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 rounded transition flex items-center space-x-2"
-                  >
-                    <Trash2 size={14} />
-                    <span>Delete Operation</span>
-                  </button>
+                  <div className="flex space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => handleArchiveTask(editingTask.id)}
+                      className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-[#FDB913] bg-black hover:bg-zinc-800 rounded transition flex items-center space-x-2"
+                    >
+                      <History size={14} />
+                      <span>Archive</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteTask(editingTask.id)}
+                      className="px-6 py-3 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-50 rounded transition flex items-center space-x-2"
+                    >
+                      <Trash2 size={14} />
+                      <span>Delete</span>
+                    </button>
+                  </div>
                 )}
                 {!editingTask && <div></div>} {/* Spacer */}
                 <div className="flex items-center space-x-4">

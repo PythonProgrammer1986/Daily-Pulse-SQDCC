@@ -55,6 +55,7 @@ export interface Task {
   updatedAt?: string;
   escalated?: boolean;
   escalationReason?: string;
+  isArchived?: boolean;
 }
 
 export interface Project {
@@ -68,6 +69,7 @@ export interface Project {
   description: string;
   progress?: number; // Manual % completion
   updatedAt?: string;
+  isArchived?: boolean;
 }
 
 export interface Activity {
@@ -79,6 +81,7 @@ export interface Activity {
   status: "Completed" | "In Progress" | "Blocked";
   remarks: string;
   updatedAt?: string;
+  isArchived?: boolean;
 }
 
 export interface KPIDailyLog {
@@ -100,6 +103,7 @@ export interface KPI {
   remarks: string;
   dailyLogs?: KPIDailyLog[];
   updatedAt?: string;
+  isArchived?: boolean;
 }
 
 export interface Idea {
@@ -111,6 +115,7 @@ export interface Idea {
   status: "New" | "Under Review" | "Approved" | "Implemented" | "Rejected";
   date: string;
   updatedAt?: string;
+  isArchived?: boolean;
 }
 
 export interface Kudos {
@@ -120,6 +125,7 @@ export interface Kudos {
   reason: string;
   date: string;
   updatedAt?: string;
+  isArchived?: boolean;
 }
 
 export interface KeyResult {
@@ -132,6 +138,7 @@ export interface OKR {
   objective: string;
   keyResults: KeyResult[];
   updatedAt?: string;
+  isArchived?: boolean;
 }
 
 export interface User {
@@ -158,6 +165,7 @@ export interface PersistentItem {
   text: string;
   completed?: boolean;
   updatedAt?: string;
+  isArchived?: boolean;
 }
 
 export interface ActiveLock {

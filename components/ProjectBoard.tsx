@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Project, ProjectStatus } from "../types";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus, Edit2, Trash2, History } from "lucide-react";
 
 interface ProjectBoardProps {
   projects: Project[];
@@ -58,6 +58,16 @@ const ProjectBoard: React.FC<ProjectBoardProps> = ({
   const handleDelete = (id: string) => {
     if (confirm("Delete this project?")) {
       updateProjects(projects.filter((p) => p.id !== id));
+      setShowModal(false);
+    }
+  };
+
+  const handleArchive = (id: string) => {
+    if (confirm("Move this project to the Audit Trail (Archive)?")) {
+      updateProjects(
+        projects.map((p) => (p.id === id ? { ...p, isArchived: true, updatedAt: new Date().toISOString() } : p))
+      );
+      setShowModal(false);
     }
   };
 
@@ -82,7 +92,7 @@ const ProjectBoard: React.FC<ProjectBoardProps> = ({
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {projects.map((project) => (
+        {projects.filter((p) => !p.isArchived).map((project) => (
           <div
             key={project.id}
             className="bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition p-6"
@@ -97,6 +107,16 @@ const ProjectBoard: React.FC<ProjectBoardProps> = ({
                 </p>
               </div>
               <div className="flex space-x-2">
+                {(project.status === "Completed" || project.progress === 100) && (
+                  <button
+                    onClick={() => handleArchive(project.id)}
+                    className="p-2 text-[#FDB913] hover:bg-zinc-800 hover:text-[#FDB913] rounded transition flex items-center bg-black"
+                    title="Archive Project"
+                  >
+                    <History size={16} />
+                    <span className="sr-only">Archive</span>
+                  </button>
+                )}
                 <button
                   onClick={() => openEdit(project)}
                   className="p-2 text-blue-600 hover:bg-blue-50 rounded"
