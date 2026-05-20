@@ -375,7 +375,30 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-5 text-xs font-black text-zinc-700 uppercase">
-                      {t.owner}
+                      {readOnly ? (
+                        t.owner || "UNASSIGNED"
+                      ) : (
+                        <select
+                          className="bg-transparent font-black text-zinc-700 uppercase outline-none focus:ring-0 cursor-pointer text-xs"
+                          value={t.owner || ""}
+                          onChange={(e) => {
+                            updateTasks(
+                              tasks.map((task) =>
+                                task.id === t.id
+                                  ? { ...task, owner: e.target.value }
+                                  : task
+                              )
+                            );
+                          }}
+                        >
+                          <option value="">UNASSIGNED</option>
+                          {users.map((u) => (
+                            <option key={u} value={u}>
+                              {u}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                     </td>
                     <td className="px-6 py-5 text-xs font-black text-zinc-900">
                       {est} Hrs
@@ -477,14 +500,15 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
                       <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">
                         Stakeholder Owner *
                       </label>
-                      <select
-                        name="owner"
-                        required
-                        defaultValue={editingTask?.owner}
-                        className="w-full border p-3 rounded font-bold outline-none"
-                        disabled={readOnly}
-                      >
-                        {users.map((u) => (
+                        <select
+                          name="owner"
+                          required
+                          defaultValue={editingTask?.owner || ""}
+                          className="w-full border p-3 rounded font-bold outline-none"
+                          disabled={readOnly}
+                        >
+                          <option value="">-- UNASSIGNED --</option>
+                          {users.map((u) => (
                           <option key={u} value={u}>
                             {u}
                           </option>

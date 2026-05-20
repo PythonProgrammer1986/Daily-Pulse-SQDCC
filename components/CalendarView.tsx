@@ -2,12 +2,16 @@ import React from "react";
 import {
   format,
   addMonths,
+  subMonths,
+  startOfMonth,
   endOfMonth,
+  startOfWeek,
   endOfWeek,
   eachDayOfInterval,
   isSameMonth,
   isSameDay,
   isToday,
+  parseISO,
 } from "date-fns";
 import { Task, SafetyStatus, AppState, PersistentItem } from "../types";
 import {
@@ -308,7 +312,15 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   };
 
   const selectedDateStr = format(selectedDate, "yyyy-MM-dd");
-  const selectedTasks = tasks.filter((t) => t.dueDate === selectedDateStr);
+  
+  const weekStartStr = format(startOfWeek(selectedDate, { weekStartsOn: 1 }), "yyyy-MM-dd");
+  const weekEndStr = format(endOfWeek(selectedDate, { weekStartsOn: 1 }), "yyyy-MM-dd");
+  
+  const selectedTasks = tasks.filter((t) => {
+    if (!t.dueDate) return false;
+    return t.dueDate >= weekStartStr && t.dueDate <= weekEndStr;
+  }).sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+
   const currentSafety = safetyStatus[selectedDateStr] || {
     status: "green",
     notes: "",
@@ -481,6 +493,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
+                    <span className="text-[9px] font-black uppercase text-zinc-400 tracking-tighter">
+                      Due: {format(parseISO(t.dueDate), "MMM do")}
+                    </span>
+                    <span className="text-zinc-200">•</span>
                     <span className="text-[9px] font-black uppercase text-zinc-400 tracking-tighter">
                       {t.owner}
                     </span>
