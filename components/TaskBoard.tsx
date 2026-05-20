@@ -82,9 +82,9 @@ const TaskBoard: React.FC<TaskBoardProps> = ({
       
       let matchQuick = true;
       if (filterQuick === "Weekly Improvement") {
-        matchQuick = (t.category === "Continuous Improvement" || t.category === "Weekly Improvement") && t.status !== "Completed";
+        matchQuick = !!t.ideaLink && t.status !== "Completed";
       } else if (filterQuick === "Initiatives") {
-        matchQuick = !!t.project || t.category === "Initiative" || t.category === "Strategic Initiatives & Action Plans";
+        matchQuick = !!t.project || t.category === "Strategic Initiatives & Action Plans";
       }
 
       return matchSearch && matchOwner && matchQuick;
