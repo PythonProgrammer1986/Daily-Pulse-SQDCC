@@ -152,6 +152,46 @@ export type SafetyStatusEntry = {
 };
 export type SafetyStatus = Record<string, SafetyStatusEntry>;
 
+export interface ProductionPreparationItem {
+  id: string;
+  moReceivedDate: string;
+  moNo: string;
+  rev: string;
+  moDetails: string;
+  specialRequest: string;
+  noOfMoBomLines: number | null;
+  noOfIssuesWithMoBomLines: number | null;
+  cnIdActive: string;
+  tcMoBomCreationDate: string;
+  m3MoBomCreationDate: string;
+  status: "Active" | "Inactive" | "";
+  cnIdInactive: string;
+  date: string;
+  remarks1: string;
+  revisedMoBom: string;
+  statusIndicator: string;
+  odAction: string;
+  bomReview: string;
+  drawingNumber: string;
+  sameSpecMo: string;
+  preMoNumber: string;
+  businessUnit: string;
+  manualsForMt65: string;
+  enginePartNumber: string;
+  concernPart: string;
+  phantomPurchase: string;
+  noOfLine: string;
+  responsibleFunction: string;
+  remarks2: string;
+  group: string;
+  model: string;
+  noMoOfBomRelease?: string;
+  noOfTotalBomLines?: number | null;
+  noOfErrorReported?: number | null;
+  noOfActualErrorsBomLines?: number | null;
+  remarks3?: string;
+}
+
 export interface PersistentItem {
   id: string;
   date: string;
@@ -199,4 +239,7 @@ export interface AppState {
   ssqdcc_cost?: PersistentItem[];
   ssqdcc_capital?: PersistentItem[];
   general_notes?: PersistentItem[];
+  groups?: string[];
+  models?: string[];
+  productionPrepData?: ProductionPreparationItem[];
 }

@@ -29,6 +29,7 @@ import {
   RefreshCcw,
   Moon,
   Sun,
+  ClipboardList,
 } from "lucide-react";
 import { z } from "zod";
 import {
@@ -59,6 +60,7 @@ import KPITracker from "./components/KPITracker";
 import Masters from "./components/Masters";
 import HoursBooking from "./components/HoursBooking";
 import ArchiveBoard from "./components/ArchiveBoard";
+import ProductionPreparationBoard from "./components/ProductionPreparationBoard";
 import { Logo } from "./components/Logo";
 
 const STORAGE_KEY = "epiroc_pulse_v5_final";
@@ -91,12 +93,16 @@ export const stateSchema = z
     ssqdcc_cost: z.array(z.any()).optional(),
     ssqdcc_capital: z.array(z.any()).optional(),
     general_notes: z.array(z.any()).optional(),
+    groups: z.array(z.string()).optional(),
+    models: z.array(z.string()).optional(),
+    productionPrepData: z.array(z.any()).optional(),
   })
   .passthrough();
 
 const tabs = [
   { id: "dashboard", name: "Dashboard", icon: <LayoutDashboard size={18} /> },
   { id: "calendar", name: "Daily Calendar", icon: <Calendar size={18} /> },
+  { id: "production", name: "Production Preparation", icon: <ClipboardList size={18} /> },
   { id: "tasks", name: "Task Board", icon: <ListChecks size={18} /> },
   { id: "ideas", name: "Improvement Pulse", icon: <Lightbulb size={18} /> },
   { id: "okrs", name: "Strategic Pulse", icon: <Target size={18} /> },
@@ -158,6 +164,9 @@ const App: React.FC = () => {
         ssqdcc_cost: parsed.ssqdcc_cost || [],
         ssqdcc_capital: parsed.ssqdcc_capital || [],
         general_notes: parsed.general_notes || [],
+        groups: parsed.groups || [],
+        models: parsed.models || [],
+        productionPrepData: parsed.productionPrepData || [],
       };
     }
     return {
@@ -185,6 +194,9 @@ const App: React.FC = () => {
       ssqdcc_cost: [],
       ssqdcc_capital: [],
       general_notes: [],
+      groups: [],
+      models: [],
+      productionPrepData: [],
     };
   });
 
@@ -321,6 +333,9 @@ const App: React.FC = () => {
       ssqdcc_cost: remote.ssqdcc_cost || local.ssqdcc_cost || [],
       ssqdcc_capital: remote.ssqdcc_capital || local.ssqdcc_capital || [],
       general_notes: remote.general_notes || local.general_notes || [],
+      productionPrepData: mergeById(local.productionPrepData || [], remote.productionPrepData || []),
+      groups: remote.groups || local.groups || [],
+      models: remote.models || local.models || [],
     };
   };
 
@@ -622,6 +637,7 @@ const App: React.FC = () => {
         "kudos",
         "okrs",
         "bookings",
+        "productionPrepData",
       ];
 
       keysToCheck.forEach((key) => {
@@ -843,6 +859,15 @@ const App: React.FC = () => {
             updateAppState={(updates) => updateData(updates)}
           />
         )}
+        {activeTab === "production" && (
+          <ProductionPreparationBoard
+            data={data.productionPrepData || []}
+            groups={data.groups || []}
+            models={data.models || []}
+            updateData={(productionPrepData) => updateData({ productionPrepData })}
+            readOnly={isReadOnly}
+          />
+        )}
         {activeTab === "tasks" && (
           <TaskBoard
             readOnly={isReadOnly}
@@ -939,8 +964,12 @@ const App: React.FC = () => {
             <Masters
               users={data.users}
               categories={data.categories}
+              groups={data.groups || []}
+              models={data.models || []}
               updateUsers={(users) => updateData({ users })}
               updateCategories={(categories) => updateData({ categories })}
+              updateGroups={(groups) => updateData({ groups })}
+              updateModels={(models) => updateData({ models })}
               archiveCompleted={archiveCompleted}
             />
           </div>
