@@ -239,6 +239,7 @@ export interface AppState {
   ssqdcc_cost?: PersistentItem[];
   ssqdcc_capital?: PersistentItem[];
   general_notes?: PersistentItem[];
+  support_require?: PersistentItem[];
   topic_monday?: PersistentItem[];
   topic_tuesday?: PersistentItem[];
   topic_wednesday?: PersistentItem[];

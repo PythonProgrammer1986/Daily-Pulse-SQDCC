@@ -29,6 +29,7 @@ import {
   StickyNote,
   Trash2,
   CheckSquare,
+  LifeBuoy,
 } from "lucide-react";
 
 interface CalendarViewProps {
@@ -344,9 +345,21 @@ const CalendarView: React.FC<CalendarViewProps> = ({
               <h3 className="text-2xl font-black text-black leading-none">
                 {format(selectedDate, "EEEE, MMM do")}
               </h3>
-              <p className="text-[10px] font-bold text-[#FDB913] mt-2 uppercase tracking-wider">
-                Day-Specific Persistent Topics
-              </p>
+              {(() => {
+                const day = format(selectedDate, 'EEEE');
+                const details: Record<string, string> = {
+                  Monday: "Machine Orders (MO) & BOM",
+                  Tuesday: "SOP and Fixtures",
+                  Wednesday: "Project Updates",
+                  Thursday: "CN and EITC Support",
+                  Friday: "Weekly Improvement"
+                };
+                return details[day] ? (
+                  <p className="text-[10px] font-bold text-[#FDB913] mt-2 uppercase tracking-wider">
+                    {details[day]}
+                  </p>
+                ) : null;
+              })()}
             </div>
 
             <div className="flex bg-zinc-100 p-1 rounded-full">
@@ -463,12 +476,21 @@ const CalendarView: React.FC<CalendarViewProps> = ({
               onComplete={handleCompletePersistent}
             />
 
-            <div className="pt-4 border-t border-zinc-100">
+            <div className="pt-4 border-t border-zinc-100 space-y-6">
               <PersistentLog
                 icon={Info}
                 label="INFORMATION AND TEAM SUGGESTIONS"
                 field="general_notes"
                 items={appState.general_notes}
+                onAdd={handleAddPersistent}
+                onDelete={handleDeletePersistent}
+                onComplete={handleCompletePersistent}
+              />
+              <PersistentLog
+                icon={LifeBuoy}
+                label="SUPPORT REQUIRE"
+                field="support_require"
+                items={appState.support_require}
                 onAdd={handleAddPersistent}
                 onDelete={handleDeletePersistent}
                 onComplete={handleCompletePersistent}
