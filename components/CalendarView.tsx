@@ -339,27 +339,14 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           <div className="flex justify-between items-start mb-6">
             <div>
               <p className="text-[10px] font-black uppercase text-zinc-400 tracking-[0.2em] mb-1">
-                Shift Detail
+                Daily Pulse
               </p>
               <h3 className="text-2xl font-black text-black leading-none">
                 {format(selectedDate, "EEEE, MMM do")}
               </h3>
-              {(() => {
-                const day = format(selectedDate, 'EEEE');
-                const details: Record<string, string> = {
-                  Monday: "Machine Orders (MO) & BOM",
-                  Tuesday: "SOP and Fixtures",
-                  Wednesday: "Project Updates",
-                  Thursday: "CN and EITC Support",
-                  Friday: "Weekly Improvement"
-                };
-                return details[day] ? (
-                  <p className="text-sm font-bold text-[#FDB913] mt-2 flex items-center bg-zinc-50 py-1.5 px-3 rounded-md border border-zinc-100">
-                    <span className="w-2 h-2 rounded-full bg-[#FDB913] mr-2"></span>
-                    {details[day]}
-                  </p>
-                ) : null;
-              })()}
+              <p className="text-[10px] font-bold text-[#FDB913] mt-2 uppercase tracking-wider">
+                Day-Specific Persistent Topics
+              </p>
             </div>
 
             <div className="flex bg-zinc-100 p-1 rounded-full">
@@ -382,6 +369,16 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           </div>
 
           <div className="space-y-6">
+            <PersistentLog
+              icon={ShieldAlert}
+              label="Safety"
+              field="ssqdcc_safety"
+              items={appState.ssqdcc_safety}
+              onAdd={handleAddPersistent}
+              onDelete={handleDeletePersistent}
+              onComplete={handleCompletePersistent}
+            />
+
             {/* Task for Daily Follow-up (Persistent) */}
             <PersistentLog
               icon={StickyNote}
@@ -393,15 +390,33 @@ const CalendarView: React.FC<CalendarViewProps> = ({
               onComplete={handleCompletePersistent}
             />
 
-            <PersistentLog
-              icon={ShieldAlert}
-              label="Safety"
-              field="ssqdcc_safety"
-              items={appState.ssqdcc_safety}
-              onAdd={handleAddPersistent}
-              onDelete={handleDeletePersistent}
-              onComplete={handleCompletePersistent}
-            />
+            {(() => {
+              const day = format(selectedDate, 'EEEE');
+              const details: Record<string, {label: string, field: keyof AppState}> = {
+                Monday: { label: "Machine Orders (MO) & BOM", field: "topic_monday" },
+                Tuesday: { label: "SOP and Fixtures", field: "topic_tuesday" },
+                Wednesday: { label: "Project Updates", field: "topic_wednesday" },
+                Thursday: { label: "CN and EITC Support", field: "topic_thursday" },
+                Friday: { label: "Weekly Improvement", field: "topic_friday" }
+              };
+              const specificTopic = details[day];
+              
+              if (!specificTopic) return null;
+              
+              return (
+                <div className="pt-2">
+                  <PersistentLog
+                    icon={Target}
+                    label={`${day}: ${specificTopic.label}`}
+                    field={specificTopic.field}
+                    items={appState[specificTopic.field] as PersistentItem[]}
+                    onAdd={handleAddPersistent}
+                    onDelete={handleDeletePersistent}
+                    onComplete={handleCompletePersistent}
+                  />
+                </div>
+              );
+            })()}
             <PersistentLog
               icon={Leaf}
               label="Sustainability"
@@ -451,7 +466,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
             <div className="pt-4 border-t border-zinc-100">
               <PersistentLog
                 icon={Info}
-                label="General Shift Notes"
+                label="INFORMATION AND TEAM SUGGESTIONS"
                 field="general_notes"
                 items={appState.general_notes}
                 onAdd={handleAddPersistent}

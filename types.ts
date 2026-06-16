@@ -239,6 +239,11 @@ export interface AppState {
   ssqdcc_cost?: PersistentItem[];
   ssqdcc_capital?: PersistentItem[];
   general_notes?: PersistentItem[];
+  topic_monday?: PersistentItem[];
+  topic_tuesday?: PersistentItem[];
+  topic_wednesday?: PersistentItem[];
+  topic_thursday?: PersistentItem[];
+  topic_friday?: PersistentItem[];
   groups?: string[];
   models?: string[];
   productionPrepData?: ProductionPreparationItem[];
